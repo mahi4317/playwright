@@ -54,6 +54,20 @@ public class BrowserContextManager {
         return authenticatedContext;
     }
     
+    public static Browser getBrowser() {
+        if (browser == null) {
+            throw new IllegalStateException("Browser is not initialized. Call initializeBrowserContext() first.");
+        }
+        return browser;
+    }
+    
+    public static Page getNewPage() {
+        if (browser == null) {
+            throw new IllegalStateException("Browser is not initialized. Call initializeBrowserContext() first.");
+        }
+        return browser.newPage();
+    }
+    
     public static void closeBrowser() {
         if (authenticatedContext != null) {
             authenticatedContext.close();
