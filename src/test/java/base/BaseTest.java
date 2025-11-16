@@ -1,6 +1,7 @@
 package base;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import com.logging.LogHelper;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
@@ -12,14 +13,14 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 
 public class BaseTest {
-    protected static final Logger logger = Logger.getLogger(BaseTest.class.getName());
+    protected static final Logger logger = LogHelper.getLogger(BaseTest.class);
     protected BrowserContext context;
     protected Page page;
 
     @BeforeSuite(alwaysRun = true)
     public void setupSuite() {
         // Suite-level setup can be done here
-        logger.info("Setting up test suite");
+    logger.info("Setting up test suite");
 
         BrowserContextManager.initializeBrowserContext();
         // BrowserContextManager.performLogin();
@@ -40,9 +41,18 @@ public class BaseTest {
     }  
     
     @AfterMethod(alwaysRun = true)
-    public void tearDownTest() {
+    public void tearDownTest(org.testng.ITestResult result) {
         // Test-level teardown can be done here
-        logger.info("Tearing down test method");
+    logger.info("Tearing down test method");
+        
+        // Keep browser open on failure for debugging
+        if (result.getStatus() == org.testng.ITestResult.FAILURE) {
+            logger.error("Test FAILED: {}", result.getName());
+            logger.error("Keeping page open for inspection. Close manually.");
+            // Don't close page/context on failure - allows manual inspection
+            return;
+        }
+        
         if (page != null) {
             page.close();
         }
@@ -54,7 +64,7 @@ public class BaseTest {
     @AfterSuite(alwaysRun = true)
     public void tearDownSuite() {
         // Suite-level teardown can be done here
-        logger.info("Tearing down test suite");
-        BrowserContextManager.closeBrowser();
+    logger.info("Tearing down test suite");
+        // BrowserContextManager.closeBrowser();
     }
 }

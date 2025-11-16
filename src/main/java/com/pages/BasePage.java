@@ -1,11 +1,12 @@
 package com.pages;
 
 import java.nio.file.Paths;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import com.logging.LogHelper;
 import com.microsoft.playwright.Page;
 
 public abstract class BasePage {
-    protected static final Logger logger = Logger.getLogger(BasePage.class.getName());
+    protected static final Logger logger = LogHelper.getLogger(BasePage.class);
     protected Page page;
 
     public BasePage(Page page) {
@@ -68,5 +69,10 @@ public abstract class BasePage {
     protected void scrollByRoll(String selector, int deltaY) {
         logger.info("Scrolling element " + selector + " by deltaY: " + deltaY);
         page.evalOnSelector(selector, "el => el.scrollBy(0, " + deltaY + ")");
+    }
+
+    public void clickLocator(com.microsoft.playwright.Locator locator) {
+        logger.info("Clicking locator");
+        locator.click();
     }
 }

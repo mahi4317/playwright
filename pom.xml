@@ -32,11 +32,16 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- SLF4J for logging -->
+        <!-- Logging: SLF4J API + Logback implementation -->
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
+            <artifactId>slf4j-api</artifactId>
             <version>2.0.16</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.6</version>
         </dependency>
     </dependencies>
 

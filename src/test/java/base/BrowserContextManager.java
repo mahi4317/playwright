@@ -6,8 +6,12 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import org.slf4j.Logger;
+import com.logging.LogHelper;
 
 public class BrowserContextManager {
+
+    private static final Logger log = LogHelper.getLogger(BrowserContextManager.class);
 
     private static Browser browser;
     private static BrowserContext authenticatedContext;
@@ -16,6 +20,7 @@ public class BrowserContextManager {
     public static void initializeBrowserContext() {
         playwright = Playwright.create();
         String browserType = ConfigManager.getBrowser().toLowerCase();
+        log.info("Creating Playwright and launching browser: {}", browserType);
         switch (browserType) {
             case "chromium":
                 browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
@@ -32,7 +37,7 @@ public class BrowserContextManager {
     }
     
     public static void performLogin() {
-        BrowserContext context = browser.newContext();
+    BrowserContext context = browser.newContext();
         Page page = context.newPage();
         page.navigate(ConfigManager.getBaseUrl());
 
@@ -42,7 +47,8 @@ public class BrowserContextManager {
         page.click("#loginButton");
 
         // Wait for navigation or some element that indicates successful login
-        page.waitForSelector("#logoutButton");
+    page.waitForSelector("#logoutButton");
+    log.info("Login successful, authenticated context initialized.");
 
         authenticatedContext = context;
     }
@@ -78,5 +84,6 @@ public class BrowserContextManager {
         if (playwright != null) {
             playwright.close();
         }
+        log.info("Browser and Playwright resources closed.");
     }
 }
