@@ -6,16 +6,19 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 
 public class WebPageInput extends BasePage {
-    // Locators
-    private Locator inputField;
-    public Locator searchButton;
     
     public WebPageInput(com.microsoft.playwright.Page page) {
         super(page);
-    // Initialize locators after page is set (prefer stable locator strategies)
+    }
+
+    // Lazy getter locators - created on demand, not in constructor
     // Use placeholder-based locator for the input (more resilient than role+name)
-    this.inputField = page.getByPlaceholder("Search an example...");
-        this.searchButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Search"));
+    private Locator inputField() {
+        return page.getByPlaceholder("Search an example...");
+    }
+
+    private Locator searchButton() {
+        return page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Search"));
     }
 
     // Open this page - uses BasePage.navigateTo() and ConfigManager for URL
@@ -25,7 +28,12 @@ public class WebPageInput extends BasePage {
     }
 
     public WebPageInput enterText(String text) {
-        inputField.fill(text);
+        inputField().fill(text);
+        return this;
+    }
+
+    public WebPageInput clickSearch() {
+        searchButton().click();
         return this;
     }
 
