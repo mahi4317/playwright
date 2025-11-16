@@ -12,8 +12,9 @@ public class WebPageInput extends BasePage {
     
     public WebPageInput(com.microsoft.playwright.Page page) {
         super(page);
-        // Initialize locators after page is set
-        this.inputField = page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Search an example..."));
+    // Initialize locators after page is set (prefer stable locator strategies)
+    // Use placeholder-based locator for the input (more resilient than role+name)
+    this.inputField = page.getByPlaceholder("Search an example...");
         this.searchButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Search"));
     }
 
