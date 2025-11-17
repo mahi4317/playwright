@@ -20,6 +20,11 @@ public class DynamicTable extends BasePage{
         return page.locator("table tbody tr");
     }
 
+    private Locator tableHeaders(){
+        // Select table header cells
+        return page.locator("table thead th");
+    }
+
     private Locator yellowLabel(){
         // Yellow label contains comparison value
         return page.locator(".bg-warning");
@@ -34,9 +39,31 @@ public class DynamicTable extends BasePage{
         return this;
     }
 
-    // Get CPU value for a specific process by name
+    // Get column index by header name (case-insensitive)
+    private int getColumnIndexByHeader(String headerName){
+        logger.debug("Finding column index for header: {}", headerName);
+        List<String> headers = tableHeaders().allInnerTexts();
+        
+        for(int i = 0; i < headers.size(); i++){
+            if(headers.get(i).trim().equalsIgnoreCase(headerName.trim())){
+                logger.debug("Found column '{}' at index {}", headerName, i);
+                return i;
+            }
+        }
+        logger.warn("Column '{}' not found in headers: {}", headerName, headers);
+        return -1;
+    }
+
+    // Get CPU value for a specific process by name (robust to column reordering)
     public String getCpuValueForProcess(String processName){
         logger.info("Getting CPU value for process: {}", processName);
+        
+        // Find the CPU column index dynamically
+        int cpuColumnIndex = getColumnIndexByHeader("CPU");
+        if(cpuColumnIndex == -1){
+            logger.error("CPU column not found in table headers");
+            throw new RuntimeException("CPU column not found in table");
+        }
         
         // Find the row containing the process name
         Locator row = tableRows().filter(new Locator.FilterOptions().setHasText(processName)).first();
@@ -44,9 +71,9 @@ public class DynamicTable extends BasePage{
         // Get all cells in that row
         List<String> cells = row.locator("td").allInnerTexts();
         
-        // CPU is typically in the 3rd column (index 2): Name | Disk | CPU | Network | Memory
-        String cpuValue = cells.get(2);
-        logger.info("CPU value for {}: {}", processName, cpuValue);
+        // Get CPU value using the dynamic column index
+        String cpuValue = cells.get(cpuColumnIndex);
+        logger.info("CPU value for {} (column {}): {}", processName, cpuColumnIndex, cpuValue);
         return cpuValue;
     }
 
