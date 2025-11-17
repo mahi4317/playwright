@@ -30,7 +30,8 @@ playwright-java-automation/
 │   │   │   └── LogHelper.java              # SLF4J logger utility
 │   │   └── pages/
 │   │       ├── BasePage.java               # Base page with common actions
-│   │       └── WebPageInput.java           # Example page object
+│   │       ├── WebPageInput.java           # Example page object (search flow)
+│   │       └── LoginPage.java              # Example page object (login flow with fluent API)
 │   └── test/
 │       ├── java/
 │       │   ├── base/
@@ -171,43 +172,68 @@ start target/surefire-reports/index.html
 
 ## Writing Tests
 
-### 1. Create a Page Object
+### 1. Create a Page Object (Improved Pattern)
+
+Below is an updated `LoginPage` using **lazy getters**, **resilient locator strategy hierarchy**, **fluent API**, and **SLF4J logging**.
+
+Locator Strategy Hierarchy (most stable first):
+1. `getByTestId("id")` (after configuring `setTestIdAttribute("data-testid")` in `BrowserContextManager`)
+2. `getByLabel("Username")` (accessible label)
+3. `getByPlaceholder("Email")` (if label absent)
+4. `getByRole(AriaRole.BUTTON, options.setName("Sign in"))` (semantic role + accessible name)
+5. Scoped CSS within a form/component root (e.g., `form#login >> input[name='user']`)
 
 ```java
 package com.pages;
 
 import com.microsoft.playwright.Locator;
-import com.config.ConfigManager;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.AriaRole;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginPage extends BasePage {
-    private final Locator emailInput;
-    private final Locator passwordInput;
-    private final Locator submitButton;
+    private static final Logger log = LoggerFactory.getLogger(LoginPage.class);
 
-    public LoginPage(com.microsoft.playwright.Page page) {
+    public LoginPage(Page page) {
         super(page);
-        this.emailInput = page.locator("#email");
-        this.passwordInput = page.locator("#password");
-        this.submitButton = page.locator("button[type='submit']");
+        log.debug("LoginPage initialized");
     }
+
+    // Prefer label; fall back to role+name
+    private Locator usernameField() { return page.getByLabel("Username"); }
+    private Locator passwordField() { return page.getByLabel("Password"); }
+    private Locator signInButton() { return page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Sign in")); }
 
     public LoginPage open() {
-        navigateTo(ConfigManager.getBaseUrl() + "/login");
+        navigateTo("https://example.test/login");
         return this;
     }
 
-    public LoginPage enterEmail(String email) {
-        emailInput.fill(email);
+    public LoginPage enterUsername(String user) {
+        log.info("Entering username");
+        usernameField().fill(user);
         return this;
     }
 
-    public LoginPage enterPassword(String password) {
-        passwordInput.fill(password);
+    public LoginPage enterPassword(String pass) {
+        log.info("Entering password");
+        passwordField().fill(pass);
         return this;
     }
 
-    public void submit() {
-        submitButton.click();
+    public LoginPage clickSignIn() {
+        log.info("Clicking Sign in");
+        signInButton().click();
+        return this;
+    }
+
+    public LoginPage loginAs(String user, String pass) {
+        return enterUsername(user).enterPassword(pass).clickSignIn();
+    }
+
+    public boolean isLoaded() {
+        return usernameField().isVisible();
     }
 }
 ```
@@ -226,24 +252,23 @@ import base.BaseTest;
 import base.BrowserContextManager;
 
 public class LoginTest extends BaseTest {
-    private Page page;
-    private LoginPage loginPage;
+    private Page page; // Retrieved from BrowserContextManager
+    private LoginPage login;
 
     @BeforeMethod
     public void setupTest() {
         page = BrowserContextManager.getNewPage();
-        loginPage = new LoginPage(page);
+        login = new LoginPage(page);
+        Assert.assertTrue(login.isLoaded(), "Login page did not load properly");
     }
 
     @Test
     public void testValidLogin() {
-        loginPage.open()
-                .enterEmail("user@example.com")
-                .enterPassword("SecurePass123")
-                .submit();
-        
-        Assert.assertTrue(page.url().contains("/dashboard"), 
-                         "User not redirected to dashboard");
+        login.open()
+             .loginAs("user@example.com", "SecurePass123");
+
+        // Example post-login assertion
+        Assert.assertTrue(page.url().contains("/dashboard"), "User not redirected to dashboard");
         logger.info("Login successful");
     }
 }
