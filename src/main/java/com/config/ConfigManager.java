@@ -34,8 +34,8 @@ public class ConfigManager {
 		return getProperty("base.url");
 	}
 
-	public static String getEmailid() {
-		return getProperty("email.id");
+	public static String getUserName() {
+		return getProperty("username");
 	}
 
 	public static String getPassword() {

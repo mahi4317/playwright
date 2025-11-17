@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 public class WebPageInput extends BasePage {
     private static final Logger logger = LoggerFactory.getLogger(WebPageInput.class);
     
-    public WebPageInput(com.microsoft.playwright.Page page) {
+    public WebPageInput(Page page) {
         super(page);
         logger.debug("WebPageInput page object initialized");
     }

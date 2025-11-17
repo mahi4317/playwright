@@ -5,8 +5,9 @@
     </listeners>
     <test name="Launch URL Test">
         <classes>
-            <!-- <class name="tests.LaunchUrlTest"/> -->
+            <class name="tests.LaunchUrlTest"/>
             <class name="tests.WebInputTest"/>
+            <class name="tests.LoginTest"/>
         </classes>
     </test>
 </suite>

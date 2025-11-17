@@ -42,7 +42,7 @@ public class BrowserContextManager {
         page.navigate(ConfigManager.getBaseUrl());
 
         // Perform login steps
-        page.fill("#email", ConfigManager.getEmailid());
+        page.fill("#email", ConfigManager.getUserName());
         page.fill("#password", ConfigManager.getPassword());
         page.click("#loginButton");
 
