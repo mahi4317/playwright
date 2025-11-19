@@ -2,7 +2,6 @@ package tests;
 
 import base.BaseTest;
 import base.BrowserContextManager;
-import com.microsoft.playwright.Frame;
 import com.microsoft.playwright.FrameLocator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;

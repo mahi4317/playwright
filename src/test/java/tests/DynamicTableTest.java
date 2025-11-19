@@ -2,8 +2,6 @@ package tests;
 
 import base.BaseTest;
 import base.BrowserContextManager;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.pages.DynamicTable;
 import org.testng.Assert;
