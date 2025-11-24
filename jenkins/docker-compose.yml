@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Jenkins Master/Controller
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins-master
+    privileged: true
+    user: root
+    ports:
+      - "8080:8080"      # Jenkins Web UI
+      - "50000:50000"    # Jenkins Agent communication
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./jenkins_backup:/var/jenkins_backup
+    environment:
+      - JAVA_OPTS=-Xmx2048m -Dhudson.footerURL=https://playwright-tests.local
+      - JENKINS_OPTS=--prefix=/jenkins
+    networks:
+      - jenkins-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Jenkins Agent for Playwright Tests
+  jenkins-agent-playwright:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jenkins-agent-playwright
+    privileged: true
+    user: jenkins
+    environment:
+      - JENKINS_URL=http://jenkins:8080
+      - JENKINS_AGENT_NAME=playwright-agent
+      - JENKINS_SECRET=${JENKINS_AGENT_SECRET}
+      - JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+    volumes:
+      - agent_workspace:/home/jenkins/agent
+      - playwright_browsers:/ms-playwright
+    networks:
+      - jenkins-network
+    depends_on:
+      - jenkins
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
+    driver: local
+  agent_workspace:
+    driver: local
+  playwright_browsers:
+    driver: local
+
+networks:
+  jenkins-network:
+    driver: bridge

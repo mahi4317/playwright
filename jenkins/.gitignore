@@ -1,0 +1,23 @@
+# Jenkins Configuration Files
+
+# Ignore environment-specific files
+.env
+
+# Ignore Jenkins backup files
+jenkins_backup/
+
+# Ignore local Docker volumes
+volumes/
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.iml

@@ -377,6 +377,47 @@ npx playwright codegen --target=java https://your-app-url.com
 
 ## CI/CD Integration
 
+### Jenkins Pipeline (Recommended)
+
+This framework includes a **complete Jenkins CI/CD setup** with Docker support. See the [Jenkins Setup Guide](jenkins/README.md) for detailed instructions.
+
+**Quick Start:**
+```bash
+cd jenkins
+chmod +x setup.sh
+./setup.sh
+```
+
+Access Jenkins at `http://localhost:8080` and follow the setup wizard.
+
+**Key Features:**
+- ✅ Multi-environment testing (dev, qa, prod)
+- ✅ Multi-browser support (Chromium, Firefox, WebKit)
+- ✅ Parallel test execution
+- ✅ HTML test reports with history
+- ✅ Email notifications
+- ✅ Docker-based Jenkins agents
+- ✅ Automated browser installation
+
+**Files:**
+- `Jenkinsfile` - Complete pipeline configuration
+- `jenkins/README.md` - Comprehensive setup documentation
+- `jenkins/Dockerfile` - Custom Jenkins agent with Playwright
+- `jenkins/docker-compose.yml` - Docker orchestration
+- `jenkins/setup.sh` - Automated setup script
+
+**Manual Pipeline Trigger:**
+```bash
+# Via Jenkins UI
+Jenkins → Playwright-Tests → Build with Parameters
+
+# Select:
+# - Environment: dev/qa/prod
+# - Browser: chromium/firefox/webkit/all
+# - Headless: true/false
+# - Test Class: (optional) specific test to run
+```
+
 ### GitHub Actions Example
 
 Create `.github/workflows/playwright-tests.yml`:
@@ -425,51 +466,6 @@ jobs:
         if: always()
         with:
           files: target/surefire-reports/TEST-*.xml
-```
-
-### Jenkins Pipeline Example
-
-```groovy
-pipeline {
-    agent any
-    
-    tools {
-        maven 'Maven 3.9'
-        jdk 'JDK 16'
-    }
-    
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        
-        stage('Install Playwright') {
-            steps {
-                sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps"'
-            }
-        }
-        
-        stage('Run Tests') {
-            steps {
-                sh 'mvn clean test -Denv=${ENV}'
-            }
-        }
-    }
-    
-    post {
-        always {
-            junit 'target/surefire-reports/TEST-*.xml'
-            archiveArtifacts artifacts: 'target/logs/**/*.log', allowEmptyArchive: true
-            publishHTML([
-                reportDir: 'target/surefire-reports',
-                reportFiles: 'index.html',
-                reportName: 'TestNG Report'
-            ])
-        }
-    }
-}
 ```
 
 ## Contributing
