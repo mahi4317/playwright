@@ -2,13 +2,22 @@
 
 A production-ready test automation framework built with **Playwright**, **Java 16**, **TestNG**, and **SLF4J/Logback** logging. Follows Page Object Model (POM) design pattern for maintainable and scalable test automation.
 
+## 📚 Documentation
+
+- **[Framework Architecture & Execution Flow](docs/FRAMEWORK_ARCHITECTURE.md)** - Complete architecture deep dive
+- **[Test Data Management Guide](docs/TEST_DATA_MANAGEMENT.md)** - Comprehensive data handling strategies
+- **[Jenkins CI/CD Setup](jenkins/README.md)** - Complete CI/CD pipeline setup
+
 ## Features
 
 ✅ **Page Object Model (POM)** - Clean separation of test logic and UI interactions  
 ✅ **Centralized Configuration** - Environment-specific properties (dev, qa, prod)  
+✅ **Test Data Management** - JSON, Excel, Properties, and Random data support  
 ✅ **Advanced Logging** - SLF4J + Logback with console and rolling file appenders  
 ✅ **TestNG Listeners** - Automatic lifecycle logging and failure diagnostics  
 ✅ **Multi-Browser Support** - Chromium, Firefox, WebKit  
+✅ **Data-Driven Testing** - Excel and JSON data providers  
+✅ **CI/CD Ready** - Complete Jenkins pipeline with Docker support  
 ✅ **Flexible Teardown** - Keep browser open on test failure for debugging  
 ✅ **Maven Integration** - Easy build and test execution  
 
@@ -22,16 +31,29 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 
 ```
 playwright-java-automation/
+├── docs/
+│   ├── FRAMEWORK_ARCHITECTURE.md       # Complete architecture & flow guide
+│   └── TEST_DATA_MANAGEMENT.md         # Test data handling guide
+├── jenkins/
+│   ├── README.md                       # Jenkins CI/CD setup guide
+│   ├── Jenkinsfile                     # Pipeline configuration (in root)
+│   └── docker-compose.yml              # Docker setup for Jenkins
 ├── src/
 │   ├── main/java/com/
 │   │   ├── config/
 │   │   │   └── ConfigManager.java          # Environment configuration loader
 │   │   ├── logging/
 │   │   │   └── LogHelper.java              # SLF4J logger utility
-│   │   └── pages/
-│   │       ├── BasePage.java               # Base page with common actions
-│   │       ├── WebPageInput.java           # Example page object (search flow)
-│   │       └── LoginPage.java              # Example page object (login flow with fluent API)
+│   │   ├── pages/
+│   │   │   ├── BasePage.java               # Base page with common actions
+│   │   │   ├── LoginPage.java              # Login page object with fluent API
+│   │   │   └── WebPageInput.java           # Web input page object
+│   │   └── testdata/
+│   │       ├── TestDataManager.java        # JSON/Random data manager
+│   │       ├── ExcelDataProvider.java      # Excel DataProvider for TestNG
+│   │       └── models/
+│   │           ├── LoginUser.java          # Login data model
+│   │           └── WebInputData.java       # Web input data model
 │   └── test/
 │       ├── java/
 │       │   ├── base/
@@ -39,18 +61,26 @@ playwright-java-automation/
 │       │   │   ├── BrowserContextManager.java  # Browser/context management
 │       │   │   └── LoggingListener.java    # TestNG listener for events
 │       │   └── tests/
-│       │       └── WebInputTest.java       # Example test
+│       │       ├── LoginTest.java          # Login test examples
+│       │       ├── LoginTestWithData.java  # Data-driven login tests
+│       │       └── WebInputTest.java       # Web input test examples
 │       └── resources/
 │           ├── config/
-│           │   └── dev.properties          # Environment-specific config
+│           │   ├── dev.properties          # Dev environment config
+│           │   ├── qa.properties           # QA environment config
+│           │   └── prod.properties         # Prod environment config
+│           ├── testdata/
+│           │   ├── users.json              # User test data
+│           │   ├── webinputs.json          # Web input test data
+│           │   └── testdata.xlsx           # Excel test data (optional)
 │           ├── logback.xml                 # Logback configuration
 │           └── testng.xml                  # TestNG suite definition
 ├── target/
 │   ├── logs/
 │   │   └── test-execution.log              # Rolling log files (7-day rotation)
 │   └── surefire-reports/                   # TestNG HTML/XML reports
-├── pom.xml
-└── README.md
+├── pom.xml                                 # Maven dependencies & build config
+└── Jenkinsfile                             # CI/CD pipeline definition
 ```
 
 ## Setup
