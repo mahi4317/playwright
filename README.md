@@ -5,6 +5,7 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 ## 📚 Documentation
 
 - **[Framework Architecture & Execution Flow](docs/FRAMEWORK_ARCHITECTURE.md)** - Complete architecture deep dive
+- **[Test Data Strategy Guide](docs/TEST_DATA_STRATEGY.md)** - When to use structured vs random data
 - **[Test Data Management Guide](docs/TEST_DATA_MANAGEMENT.md)** - Comprehensive data handling strategies
 - **[Utils Package Documentation](docs/UTILS_PACKAGE.md)** - Reusable utility classes guide
 - **[Jenkins CI/CD Setup](jenkins/README.md)** - Complete CI/CD pipeline setup
