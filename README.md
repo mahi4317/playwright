@@ -6,6 +6,7 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 
 - **[Framework Architecture & Execution Flow](docs/FRAMEWORK_ARCHITECTURE.md)** - Complete architecture deep dive
 - **[Test Data Management Guide](docs/TEST_DATA_MANAGEMENT.md)** - Comprehensive data handling strategies
+- **[Utils Package Documentation](docs/UTILS_PACKAGE.md)** - Reusable utility classes guide
 - **[Jenkins CI/CD Setup](jenkins/README.md)** - Complete CI/CD pipeline setup
 
 ## Features
@@ -13,6 +14,7 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 ✅ **Page Object Model (POM)** - Clean separation of test logic and UI interactions  
 ✅ **Centralized Configuration** - Environment-specific properties (dev, qa, prod)  
 ✅ **Test Data Management** - JSON, Excel, Properties, and Random data support  
+✅ **Utils Package** - Reusable utilities for waits, screenshots, data generation, assertions  
 ✅ **Advanced Logging** - SLF4J + Logback with console and rolling file appenders  
 ✅ **TestNG Listeners** - Automatic lifecycle logging and failure diagnostics  
 ✅ **Multi-Browser Support** - Chromium, Firefox, WebKit  
@@ -33,7 +35,8 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 playwright-java-automation/
 ├── docs/
 │   ├── FRAMEWORK_ARCHITECTURE.md       # Complete architecture & flow guide
-│   └── TEST_DATA_MANAGEMENT.md         # Test data handling guide
+│   ├── TEST_DATA_MANAGEMENT.md         # Test data handling guide
+│   └── UTILS_PACKAGE.md                # Utils package documentation
 ├── jenkins/
 │   ├── README.md                       # Jenkins CI/CD setup guide
 │   ├── Jenkinsfile                     # Pipeline configuration (in root)
@@ -48,12 +51,18 @@ playwright-java-automation/
 │   │   │   ├── BasePage.java               # Base page with common actions
 │   │   │   ├── LoginPage.java              # Login page object with fluent API
 │   │   │   └── WebPageInput.java           # Web input page object
-│   │   └── testdata/
-│   │       ├── TestDataManager.java        # JSON/Random data manager
-│   │       ├── ExcelDataProvider.java      # Excel DataProvider for TestNG
-│   │       └── models/
-│   │           ├── LoginUser.java          # Login data model
-│   │           └── WebInputData.java       # Web input data model
+│   │   ├── testdata/
+│   │   │   ├── TestDataManager.java        # JSON/Random data manager
+│   │   │   ├── ExcelDataProvider.java      # Excel DataProvider for TestNG
+│   │   │   └── models/
+│   │   │       ├── LoginUser.java          # Login data model
+│   │   │       └── WebInputData.java       # Web input data model
+│   │   └── utils/
+│   │       ├── WaitUtils.java              # Explicit wait utilities
+│   │       ├── ScreenshotUtils.java        # Screenshot capture utilities
+│   │       ├── DataGeneratorUtils.java     # Random data generation
+│   │       ├── StringUtils.java            # String manipulation utilities
+│   │       └── AssertionUtils.java         # Enhanced assertion utilities
 │   └── test/
 │       ├── java/
 │       │   ├── base/
