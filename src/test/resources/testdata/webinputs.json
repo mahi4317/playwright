@@ -1,0 +1,28 @@
+{
+  "webInputs": [
+    {
+      "testName": "Valid input test",
+      "inputText": "Hello Playwright",
+      "expectedValue": "Hello Playwright",
+      "description": "Test with valid alphanumeric input"
+    },
+    {
+      "testName": "Special characters test",
+      "inputText": "Test@123!#$",
+      "expectedValue": "Test@123!#$",
+      "description": "Test with special characters"
+    },
+    {
+      "testName": "Long text test",
+      "inputText": "This is a very long text input to test the maximum character limit of the input field",
+      "expectedValue": "This is a very long text input to test the maximum character limit of the input field",
+      "description": "Test with long text input"
+    },
+    {
+      "testName": "Empty input test",
+      "inputText": "",
+      "expectedValue": "",
+      "description": "Test with empty input"
+    }
+  ]
+}

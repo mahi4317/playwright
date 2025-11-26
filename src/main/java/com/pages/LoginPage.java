@@ -46,9 +46,21 @@ public class LoginPage extends BasePage {
         return this;
     }
 
+    public LoginPage enterUsername(String username) {
+        logger.info("Typing username: {}", username);
+        usernameField().fill(username);
+        return this;
+    }
+
     public LoginPage enterPassword() {
         logger.info("Typing password");
         passwordField().fill(ConfigManager.getPassword());
+        return this;
+    }
+
+    public LoginPage enterPassword(String password) {
+        logger.info("Typing password");
+        passwordField().fill(password);
         return this;
     }
 

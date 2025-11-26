@@ -1,0 +1,29 @@
+{
+  "loginUsers": {
+    "validUser": {
+      "username": "practice",
+      "password": "SuperSecretPassword!",
+      "expectedUrl": "/secure"
+    },
+    "invalidUser": {
+      "username": "invalidUser",
+      "password": "wrongPassword",
+      "expectedError": "Your username is invalid!"
+    },
+    "emptyCredentials": {
+      "username": "",
+      "password": "",
+      "expectedError": "Your username is invalid!"
+    }
+  },
+  "searchData": {
+    "validSearch": {
+      "query": "Playwright",
+      "expectedResults": 10
+    },
+    "specialCharacters": {
+      "query": "@#$%^&*()",
+      "expectedResults": 0
+    }
+  }
+}
