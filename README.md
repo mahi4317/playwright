@@ -526,4 +526,5 @@ For questions or issues, please contact the development team or open an issue on
 
 ---
 **Last Updated**: November 27, 2025  
-**CI/CD Status**: ✅ Automated Jenkins pipeline active
+**CI/CD Status**: ✅ Automated Jenkins pipeline active  
+**Build Trigger**: SCM polling enabled - checks GitHub every 5 minutes
