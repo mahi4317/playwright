@@ -1,0 +1,6 @@
+
+# Test Auto-Trigger - 2025-11-27 17:16:01
+
+This commit tests Jenkins SCM polling auto-trigger functionality.
+If polling is active, Jenkins should detect this change within 2 minutes.
+
