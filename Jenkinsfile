@@ -1,6 +1,14 @@
 pipeline {
     agent any
     
+    triggers {
+        // Poll GitHub every 5 minutes for changes
+        pollSCM('H/5 * * * *')
+        
+        // Or use GitHub webhook for instant triggers (recommended)
+        // Configure webhook in GitHub repo settings pointing to: http://your-jenkins-url/github-webhook/
+    }
+    
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Select environment to run tests')
         choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Select browser for testing')
