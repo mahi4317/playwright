@@ -1,11 +1,6 @@
 pipeline {
     agent any
     
-    tools {
-        maven 'Maven-3.9.0' // Configure in Jenkins Global Tool Configuration
-        jdk 'JDK-17'        // Configure in Jenkins Global Tool Configuration
-    }
-    
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Select environment to run tests')
         choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Select browser for testing')
