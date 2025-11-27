@@ -39,7 +39,8 @@ out/
 bin/
 
 # IDE - VS Code
-.vscode/
+.vscode/*
+!.vscode/mcp.json
 *.code-workspace
 
 # OS Files
