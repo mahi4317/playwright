@@ -2,11 +2,8 @@ pipeline {
     agent any
     
     triggers {
-        // Poll GitHub every 5 minutes for changes
-        pollSCM('H/5 * * * *')
-        
-        // Or use GitHub webhook for instant triggers (recommended)
-        // Configure webhook in GitHub repo settings pointing to: http://your-jenkins-url/github-webhook/
+        // Poll GitHub every 2 minutes for changes (more frequent for testing)
+        pollSCM('H/2 * * * *')
     }
     
     parameters {
