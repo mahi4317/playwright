@@ -15,8 +15,6 @@ pipeline {
     environment {
         CI = 'true'
         MAVEN_OPTS = '-Xmx1024m'
-        PATH = "/opt/homebrew/bin:/opt/homebrew/opt/openjdk@17/bin:${env.PATH}"
-        JAVA_HOME = '/opt/homebrew/opt/openjdk@17'
     }
     
     stages {
@@ -31,21 +29,17 @@ pipeline {
             steps {
                 echo "🔨 Building and running tests..."
                 sh '''
-                    # Set paths
-                    export PATH="/opt/homebrew/bin:/opt/homebrew/opt/openjdk@17/bin:$PATH"
-                    export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
-                    
-                    # Verify tools
+                    # Verify tools (use container paths)
                     echo "Java version:"
-                    /opt/homebrew/opt/openjdk@17/bin/java -version
+                    java -version
                     echo "Maven version:"
-                    /opt/homebrew/bin/mvn -version
+                    mvn -version
                     
                     # Install Playwright browsers
-                    /opt/homebrew/bin/mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps" || true
+                    mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps" || true
                     
                     # Run tests
-                    /opt/homebrew/bin/mvn clean test -Denv=${ENVIRONMENT}
+                    mvn clean test -Denv=${ENVIRONMENT}
                 '''
             }
         }
