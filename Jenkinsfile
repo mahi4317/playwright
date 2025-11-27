@@ -26,11 +26,21 @@ pipeline {
             steps {
                 echo "🔨 Building and running tests..."
                 sh '''
+                    # Set paths
+                    export PATH="/opt/homebrew/bin:/opt/homebrew/opt/openjdk@17/bin:$PATH"
+                    export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
+                    
+                    # Verify tools
+                    echo "Java version:"
+                    /opt/homebrew/opt/openjdk@17/bin/java -version
+                    echo "Maven version:"
+                    /opt/homebrew/bin/mvn -version
+                    
                     # Install Playwright browsers
-                    mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps" || true
+                    /opt/homebrew/bin/mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps" || true
                     
                     # Run tests
-                    mvn clean test -Denv=${ENVIRONMENT}
+                    /opt/homebrew/bin/mvn clean test -Denv=${ENVIRONMENT}
                 '''
             }
         }
