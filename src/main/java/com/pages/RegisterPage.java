@@ -24,6 +24,14 @@ public class RegisterPage extends BasePage {
     Locator registerButton(){
         return page.getByRole(com.microsoft.playwright.options.AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Register"));
     }
+    
+    private Locator successMessage() {
+        return page.locator(".alert-success, .success-message, [role='alert']");
+    }
+    
+    private Locator errorMessage() {
+        return page.locator(".alert-danger, .error-message, .alert-error");
+    }
 
     public RegisterPage enterUsername(String username) {
         usernameField().fill(username);
@@ -46,5 +54,21 @@ public class RegisterPage extends BasePage {
     public RegisterPage open() {
         page.navigate("https://practice.expandtesting.com/register");
         return this;
+    }
+    
+    public boolean isSuccessMessageVisible() {
+        return successMessage().isVisible();
+    }
+    
+    public boolean isErrorMessageVisible() {
+        return errorMessage().isVisible();
+    }
+    
+    public String getSuccessMessageText() {
+        return successMessage().textContent();
+    }
+    
+    public String getErrorMessageText() {
+        return errorMessage().textContent();
     }
 }
