@@ -10,6 +10,8 @@ pipeline {
     environment {
         CI = 'true'
         MAVEN_OPTS = '-Xmx1024m'
+        PATH = "/opt/homebrew/bin:/opt/homebrew/opt/openjdk@17/bin:${env.PATH}"
+        JAVA_HOME = '/opt/homebrew/opt/openjdk@17'
     }
     
     stages {
