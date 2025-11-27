@@ -20,16 +20,20 @@ public class BrowserContextManager {
     public static void initializeBrowserContext() {
         playwright = Playwright.create();
         String browserType = ConfigManager.getBrowser().toLowerCase();
-        log.info("Creating Playwright and launching browser: {}", browserType);
+        
+        // Detect CI environment (GitHub Actions sets CI=true)
+        boolean isHeadless = Boolean.parseBoolean(System.getenv().getOrDefault("CI", "false"));
+        
+        log.info("Creating Playwright and launching browser: {} (headless: {})", browserType, isHeadless);
         switch (browserType) {
             case "chromium":
-                browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+                browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(isHeadless));
                 break;
             case "firefox":
-                browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(false));
+                browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(isHeadless));
                 break;
             case "webkit":
-                browser = playwright.webkit().launch(new BrowserType.LaunchOptions().setHeadless(false));
+                browser = playwright.webkit().launch(new BrowserType.LaunchOptions().setHeadless(isHeadless));
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported browser type: " + browserType);
