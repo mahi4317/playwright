@@ -8,6 +8,9 @@
             <class name="tests.LaunchUrlTest"/>
             <class name="tests.WebInputTest"/>
             <class name="tests.LoginTest"/>
+            <class name="tests.AlartTest"/>
+            <class name="tests.IframeTest"/>
+            <class name="tests.DynamicTableTest"/>
         </classes>
     </test>
 </suite>
