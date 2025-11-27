@@ -15,8 +15,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./jenkins_backup:/var/jenkins_backup
     environment:
-      - JAVA_OPTS=-Xmx2048m -Dhudson.footerURL=https://playwright-tests.local
-      - JENKINS_OPTS=--prefix=/jenkins
+      - JAVA_OPTS=-Xmx2048m
     networks:
       - jenkins-network
     restart: unless-stopped
