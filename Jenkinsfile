@@ -8,8 +8,7 @@ pipeline {
     
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Select environment to run tests')
-        choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit', 'all'], description: 'Select browser for testing')
-        booleanParam(name: 'HEADLESS', defaultValue: true, description: 'Run tests in headless mode')
+        choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Select browser for testing')
         string(name: 'TEST_CLASS', defaultValue: '', description: 'Specific test class to run (leave empty for all tests)')
     }
     
@@ -43,7 +42,7 @@ pipeline {
                     echo "📋 Build Information:"
                     echo "Environment: ${params.ENVIRONMENT}"
                     echo "Browser: ${params.BROWSER}"
-                    echo "Headless Mode: ${params.HEADLESS}"
+                    echo "Headless Mode: Auto-detected (CI=true)"
                     echo "Test Class: ${params.TEST_CLASS ?: 'All Tests'}"
                     
                     sh '''
@@ -70,13 +69,8 @@ pipeline {
         stage('Install Playwright Browsers') {
             steps {
                 script {
-                    echo "🌐 Installing Playwright browsers..."
-                    
-                    if (params.BROWSER == 'all') {
-                        sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install"'
-                    } else {
-                        sh "mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args='install ${params.BROWSER}'"
-                    }
+                    echo "🌐 Installing Playwright browsers with system dependencies..."
+                    sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps"'
                 }
             }
         }
@@ -102,15 +96,8 @@ pipeline {
                         testCommand += " -Dtest=${params.TEST_CLASS}"
                     }
                     
-                    // Add browser parameter if not 'all'
-                    if (params.BROWSER != 'all') {
-                        testCommand += " -Dbrowser=${params.BROWSER}"
-                    }
-                    
-                    // Add headless parameter
-                    testCommand += " -Dheadless=${params.HEADLESS}"
-                    
                     echo "Executing: ${testCommand}"
+                    echo "Note: Browser '${params.BROWSER}' configured in dev.properties, Headless mode auto-detected via CI env var"
                     
                     // Run tests and capture results (continue on failure)
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
@@ -203,8 +190,8 @@ pipeline {
                 // Clean up Playwright browsers cache (optional)
                 // sh 'rm -rf ${PLAYWRIGHT_BROWSERS_PATH}'
                 
-                // Send notifications (configure as needed)
-                emailext(
+                // Send notifications (uncomment and configure email as needed)
+                /* emailext(
                     subject: "Jenkins Build ${currentBuild.result}: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
                     body: """
                         <h2>Build ${currentBuild.result}</h2>
@@ -216,10 +203,10 @@ pipeline {
                         <p><b>URL:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
                         <p>Check console output at <a href="${env.BUILD_URL}console">${env.BUILD_URL}console</a></p>
                     """,
-                    to: 'team@example.com', // Configure your email
+                    to: 'your-email@example.com',
                     mimeType: 'text/html',
                     attachLog: true
-                )
+                ) */
             }
         }
         
