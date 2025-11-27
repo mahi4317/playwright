@@ -8,219 +8,49 @@ pipeline {
     }
     
     environment {
-        // Maven settings
-        MAVEN_OPTS = '-Xmx1024m -XX:MaxPermSize=512m'
-        
-        // Playwright settings
-        PLAYWRIGHT_BROWSERS_PATH = "${WORKSPACE}/.playwright"
-        
-        // Test environment
-        TEST_ENV = "${params.ENVIRONMENT}"
-        TEST_BROWSER = "${params.BROWSER}"
+        CI = 'true'
+        MAVEN_OPTS = '-Xmx1024m'
     }
     
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    echo "🔄 Checking out code from repository..."
-                    // Clean workspace before checkout
-                    cleanWs()
-                    checkout scm
-                }
+                echo "🔄 Checking out code..."
+                checkout scm
             }
         }
         
-        stage('Environment Info') {
+        stage('Build & Test') {
             steps {
-                script {
-                    echo "📋 Build Information:"
-                    echo "Environment: ${params.ENVIRONMENT}"
-                    echo "Browser: ${params.BROWSER}"
-                    echo "Headless Mode: Auto-detected (CI=true)"
-                    echo "Test Class: ${params.TEST_CLASS ?: 'All Tests'}"
+                echo "🔨 Building and running tests..."
+                sh '''
+                    # Install Playwright browsers
+                    mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps" || true
                     
-                    sh '''
-                        echo "Java Version:"
-                        java -version
-                        echo "\nMaven Version:"
-                        mvn -version
-                        echo "\nNode Version:"
-                        node --version || echo "Node not found"
-                    '''
-                }
+                    # Run tests
+                    mvn clean test -Denv=${ENVIRONMENT}
+                '''
             }
         }
         
-        stage('Install Dependencies') {
+        stage('Publish Results') {
             steps {
-                script {
-                    echo "📦 Installing Maven dependencies..."
-                    sh 'mvn clean install -DskipTests'
-                }
-            }
-        }
-        
-        stage('Install Playwright Browsers') {
-            steps {
-                script {
-                    echo "🌐 Installing Playwright browsers with system dependencies..."
-                    sh 'mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps"'
-                }
-            }
-        }
-        
-        stage('Compile Tests') {
-            steps {
-                script {
-                    echo "🔨 Compiling test code..."
-                    sh 'mvn test-compile'
-                }
-            }
-        }
-        
-        stage('Run Tests') {
-            steps {
-                script {
-                    echo "🧪 Running Playwright tests..."
-                    
-                    def testCommand = "mvn clean test -Denv=${params.ENVIRONMENT}"
-                    
-                    // Add specific test class if provided
-                    if (params.TEST_CLASS) {
-                        testCommand += " -Dtest=${params.TEST_CLASS}"
-                    }
-                    
-                    echo "Executing: ${testCommand}"
-                    echo "Note: Browser '${params.BROWSER}' configured in dev.properties, Headless mode auto-detected via CI env var"
-                    
-                    // Run tests and capture results (continue on failure)
-                    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                        sh testCommand
-                    }
-                }
-            }
-        }
-        
-        stage('Generate Reports') {
-            steps {
-                script {
-                    echo "📊 Generating test reports..."
-                    
-                    // Archive TestNG reports
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'target/surefire-reports',
-                        reportFiles: 'index.html',
-                        reportName: 'TestNG HTML Report',
-                        reportTitles: 'Playwright Test Results'
-                    ])
-                }
-            }
-        }
-        
-        stage('Archive Artifacts') {
-            steps {
-                script {
-                    echo "📁 Archiving test artifacts..."
-                    
-                    // Archive test reports
-                    archiveArtifacts artifacts: 'target/surefire-reports/**/*', 
-                                   fingerprint: true,
-                                   allowEmptyArchive: true
-                    
-                    // Archive logs
-                    archiveArtifacts artifacts: 'target/logs/**/*.log', 
-                                   fingerprint: true,
-                                   allowEmptyArchive: true
-                    
-                    // Archive screenshots if any
-                    archiveArtifacts artifacts: 'target/screenshots/**/*', 
-                                   fingerprint: true,
-                                   allowEmptyArchive: true
-                }
-            }
-        }
-        
-        stage('Publish Test Results') {
-            steps {
-                script {
-                    echo "📈 Publishing test results..."
-                    
-                    // Publish TestNG results
-                    step([$class: 'Publisher', 
-                          reportFilenamePattern: 'target/surefire-reports/testng-results.xml'])
-                    
-                    // Publish JUnit results (Surefire generates these too)
-                    junit testResults: 'target/surefire-reports/*.xml',
-                          allowEmptyResults: true,
-                          skipPublishingChecks: false
-                }
-            }
-        }
-        
-        stage('Code Quality Analysis') {
-            when {
-                expression { return params.ENVIRONMENT == 'dev' }
-            }
-            steps {
-                script {
-                    echo "🔍 Running code quality checks..."
-                    
-                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh 'mvn checkstyle:checkstyle || true'
-                    }
-                }
+                echo "📊 Publishing test results..."
+                junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+                archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
             }
         }
     }
     
     post {
         always {
-            script {
-                echo "🧹 Cleaning up..."
-                
-                // Clean up Playwright browsers cache (optional)
-                // sh 'rm -rf ${PLAYWRIGHT_BROWSERS_PATH}'
-                
-                // Send notifications (uncomment and configure email as needed)
-                /* emailext(
-                    subject: "Jenkins Build ${currentBuild.result}: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
-                    body: """
-                        <h2>Build ${currentBuild.result}</h2>
-                        <p><b>Job:</b> ${env.JOB_NAME}</p>
-                        <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
-                        <p><b>Environment:</b> ${params.ENVIRONMENT}</p>
-                        <p><b>Browser:</b> ${params.BROWSER}</p>
-                        <p><b>Duration:</b> ${currentBuild.durationString}</p>
-                        <p><b>URL:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                        <p>Check console output at <a href="${env.BUILD_URL}console">${env.BUILD_URL}console</a></p>
-                    """,
-                    to: 'your-email@example.com',
-                    mimeType: 'text/html',
-                    attachLog: true
-                ) */
-            }
+            echo "🧹 Build finished!"
         }
-        
         success {
-            echo "✅ Build completed successfully!"
-            // Slack notification example (requires Slack plugin)
-            // slackSend color: 'good', message: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+            echo "✅ Tests passed successfully!"
         }
-        
         failure {
-            echo "❌ Build failed!"
-            // Slack notification example
-            // slackSend color: 'danger', message: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-        }
-        
-        unstable {
-            echo "⚠️ Build is unstable!"
-            // Slack notification example
-            // slackSend color: 'warning', message: "Build Unstable: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+            echo "❌ Tests failed!"
         }
     }
 }
