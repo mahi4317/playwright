@@ -433,13 +433,13 @@ This framework uses a **modern Docker-based CI/CD architecture** with Jenkins or
 #### Architecture
 
 ```
-Mac (Host with Docker Desktop)
-    ↓
-Docker Engine
-    ↓
-jenkins-master container (permanent)
-    ↓ spawns on-demand
-playwright container (temporary - per build)
+1. Mac (Hardware + macOS)
+   ↓
+2. Docker Desktop (Container Platform)
+   ↓ creates and runs
+3. jenkins-master container (Permanent - CI/CD orchestrator)
+   ↓ creates on-demand
+4. playwright container (Temporary - Test executor)
 ```
 
 #### Quick Start
