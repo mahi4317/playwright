@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/playwright/java:v1.48.0-noble'
-            // Official Playwright image with all browsers pre-installed
-            args '-v $HOME/.m2:/root/.m2'  // Cache Maven dependencies
-        }
-    }
+    agent any
     
     triggers {
         // Poll GitHub every 2 minutes for changes (more frequent for testing)
@@ -41,10 +35,7 @@ pipeline {
                     echo "Maven version:"
                     mvn -version
                     
-                    # No browser installation needed - already in image!
-                    echo "Playwright browsers:"
-                    ls -la /ms-playwright/
-                    
+                    # Browsers already installed in jenkins-master container
                     # Run tests
                     mvn clean test -Denv=${ENVIRONMENT}
                 '''
