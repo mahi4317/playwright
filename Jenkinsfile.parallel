@@ -1,0 +1,92 @@
+pipeline {
+    agent none
+    
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
+    
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Select environment')
+    }
+    
+    environment {
+        CI = 'true'
+        MAVEN_OPTS = '-Xmx1024m'
+    }
+    
+    stages {
+        stage('Checkout') {
+            agent any
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Run All Tests in Parallel') {
+            parallel {
+                // Branch 1: Playwright Web Tests
+                stage('Web Tests - Chromium') {
+                    agent {
+                        docker {
+                            image 'mcr.microsoft.com/playwright/java:v1.48.0-noble'
+                        }
+                    }
+                    steps {
+                        sh 'mvn test -Dbrowser=chromium -Denv=${ENVIRONMENT}'
+                    }
+                }
+                
+                stage('Web Tests - Firefox') {
+                    agent {
+                        docker {
+                            image 'mcr.microsoft.com/playwright/java:v1.48.0-noble'
+                        }
+                    }
+                    steps {
+                        sh 'mvn test -Dbrowser=firefox -Denv=${ENVIRONMENT}'
+                    }
+                }
+                
+                // Branch 2: Appium Mobile Tests
+                stage('Mobile Tests - Android') {
+                    agent {
+                        docker {
+                            image 'appium/appium:v2.11.5-p0'
+                            args '--privileged'
+                        }
+                    }
+                    steps {
+                        sh '''
+                            appium &
+                            sleep 5
+                            mvn test -Dplatform=android -Denv=${ENVIRONMENT}
+                        '''
+                    }
+                }
+                
+                stage('Mobile Tests - iOS') {
+                    agent {
+                        docker {
+                            image 'appium/appium:v2.11.5-p0'
+                            args '--privileged'
+                        }
+                    }
+                    steps {
+                        sh '''
+                            appium &
+                            sleep 5
+                            mvn test -Dplatform=ios -Denv=${ENVIRONMENT}
+                        '''
+                    }
+                }
+            }
+        }
+        
+        stage('Publish Results') {
+            agent any
+            steps {
+                junit 'target/surefire-reports/*.xml'
+            }
+        }
+    }
+}

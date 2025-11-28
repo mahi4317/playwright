@@ -1,0 +1,92 @@
+pipeline {
+    agent none  // Don't use a default agent - specify per stage
+    
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
+    
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Select environment')
+        choice(name: 'TEST_SUITE', choices: ['all', 'web-only', 'mobile-only'], description: 'Which tests to run')
+    }
+    
+    environment {
+        CI = 'true'
+        MAVEN_OPTS = '-Xmx1024m'
+    }
+    
+    stages {
+        stage('Checkout') {
+            agent any
+            steps {
+                echo "🔄 Checking out code..."
+                checkout scm
+            }
+        }
+        
+        stage('Web Tests (Playwright)') {
+            when {
+                expression { params.TEST_SUITE == 'all' || params.TEST_SUITE == 'web-only' }
+            }
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright/java:v1.48.0-noble'
+                    // Playwright container with Chromium, Firefox, WebKit
+                }
+            }
+            steps {
+                echo "🌐 Running Playwright web tests..."
+                sh '''
+                    echo "Testing with Playwright browsers"
+                    mvn clean test -Denv=${ENVIRONMENT} -Dtest=*Web*
+                '''
+            }
+        }
+        
+        stage('Mobile Tests (Appium)') {
+            when {
+                expression { params.TEST_SUITE == 'all' || params.TEST_SUITE == 'mobile-only' }
+            }
+            agent {
+                docker {
+                    image 'appium/appium:v2.11.5-p0'
+                    // Appium container for mobile automation
+                    args '--privileged -v /dev/bus/usb:/dev/bus/usb'
+                }
+            }
+            steps {
+                echo "📱 Running Appium mobile tests..."
+                sh '''
+                    echo "Testing with Appium"
+                    # Start Appium server
+                    appium &
+                    sleep 5
+                    
+                    # Run mobile tests
+                    mvn clean test -Denv=${ENVIRONMENT} -Dtest=*Mobile*
+                '''
+            }
+        }
+        
+        stage('Publish Results') {
+            agent any
+            steps {
+                echo "📊 Publishing test results..."
+                junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+                archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "🧹 Build finished!"
+        }
+        success {
+            echo "✅ All tests passed!"
+        }
+        failure {
+            echo "❌ Some tests failed!"
+        }
+    }
+}

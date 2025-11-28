@@ -1,0 +1,30 @@
+# Custom Appium Container with Java and Maven
+FROM appium/appium:v2.11.5-p0
+
+# Switch to root for installations
+USER root
+
+# Install Java 17 and Maven
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jdk \
+    maven \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Android SDK tools (optional)
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    && wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip \
+    && unzip commandlinetools-linux-9477386_latest.zip -d /opt/android-sdk \
+    && rm commandlinetools-linux-9477386_latest.zip
+
+ENV ANDROID_HOME=/opt/android-sdk
+
+# Verify installations
+RUN java -version && mvn -version && appium -v
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command
+CMD ["appium"]
