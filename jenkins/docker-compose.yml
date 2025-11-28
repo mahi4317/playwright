@@ -3,7 +3,9 @@ version: '3.8'
 services:
   # Jenkins Master/Controller
   jenkins:
-    image: jenkins/jenkins:lts-jdk17
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins  # Custom image with Docker pre-installed
     container_name: jenkins-master
     privileged: true
     user: root
@@ -28,7 +30,7 @@ services:
 
   # Jenkins Agent for Playwright Tests
   jenkins-agent-playwright:
-    build:
+    build:  Z1`11`    `       `
       context: .
       dockerfile: Dockerfile
     container_name: jenkins-agent-playwright

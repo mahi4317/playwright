@@ -1,0 +1,23 @@
+# Custom Jenkins Master with Docker support
+FROM jenkins/jenkins:lts-jdk17
+
+# Switch to root to install Docker
+USER root
+
+# Install Docker CLI
+RUN apt-get update && \
+    apt-get install -y \
+    docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
+# Verify Docker installation
+RUN docker --version
+
+# Give Jenkins user permission to use Docker
+RUN usermod -aG docker jenkins
+
+# Switch back to jenkins user
+USER jenkins
+
+# Pre-install recommended plugins (optional)
+# RUN jenkins-plugin-cli --plugins "docker-workflow git pipeline-stage-view"
