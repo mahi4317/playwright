@@ -3,7 +3,7 @@ pipeline {
         docker {
             image 'mcr.microsoft.com/playwright/java:v1.48.0-noble'
             // Official Playwright image with all browsers pre-installed
-            args '-v $HOME/.m2:/root/.m2'  // Cache Maven dependencies
+            // No volume mounts needed - Maven will cache inside container
         }
     }
     
