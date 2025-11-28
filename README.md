@@ -20,7 +20,10 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 ✅ **TestNG Listeners** - Automatic lifecycle logging and failure diagnostics  
 ✅ **Multi-Browser Support** - Chromium, Firefox, WebKit  
 ✅ **Data-Driven Testing** - Excel and JSON data providers  
-✅ **CI/CD Ready** - Complete Jenkins pipeline with Docker support  
+✅ **Docker-Based CI/CD** - Jenkins + Playwright in Docker containers  
+✅ **Dynamic Agent Architecture** - On-demand Playwright containers for test execution  
+✅ **Multi-Platform Support** - Examples for Playwright + Appium parallel testing  
+✅ **Automated SCM Polling** - Auto-trigger builds on GitHub commits (every 2 minutes)  
 ✅ **Flexible Teardown** - Keep browser open on test failure for debugging  
 ✅ **Maven Integration** - Easy build and test execution  
 
@@ -28,6 +31,7 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 
 - **Java 16** or higher
 - **Maven 3.6+**
+- **Docker Desktop** (for CI/CD with Jenkins)
 - **Git** (for version control)
 
 ## Project Structure
@@ -40,8 +44,13 @@ playwright-java-automation/
 │   └── UTILS_PACKAGE.md                # Utils package documentation
 ├── jenkins/
 │   ├── README.md                       # Jenkins CI/CD setup guide
-│   ├── Jenkinsfile                     # Pipeline configuration (in root)
-│   └── docker-compose.yml              # Docker setup for Jenkins
+│   ├── Dockerfile.jenkins              # Custom Jenkins image with Docker CLI
+│   ├── Dockerfile.appium               # Custom Appium image for mobile testing
+│   ├── docker-compose.yml              # Docker orchestration for Jenkins
+│   └── Jenkinsfile                     # Main pipeline (in root)
+├── Jenkinsfile                         # Production pipeline with Playwright Docker agent
+├── Jenkinsfile.multi-platform          # Example: Sequential Playwright + Appium
+├── Jenkinsfile.parallel                # Example: Parallel multi-browser + mobile testing
 ├── src/
 │   ├── main/java/com/
 │   │   ├── config/
@@ -417,46 +426,104 @@ npx playwright codegen --target=java https://your-app-url.com
 
 ## CI/CD Integration
 
-### Jenkins Pipeline (Recommended)
+### Docker-Based Jenkins Pipeline (Production Setup)
 
-This framework includes a **complete Jenkins CI/CD setup** with Docker support. See the [Jenkins Setup Guide](jenkins/README.md) for detailed instructions.
+This framework uses a **modern Docker-based CI/CD architecture** with Jenkins orchestrating on-demand Playwright containers.
 
-**Quick Start:**
+#### Architecture
+
+```
+Mac (Host with Docker Desktop)
+    ↓
+Docker Engine
+    ↓
+jenkins-master container (permanent)
+    ↓ spawns on-demand
+playwright container (temporary - per build)
+```
+
+#### Quick Start
+
 ```bash
+# 1. Start Jenkins with Docker support
 cd jenkins
-chmod +x setup.sh
-./setup.sh
+docker-compose up -d
+
+# 2. Get initial admin password
+docker exec jenkins-master cat /var/jenkins_home/secrets/initialAdminPassword
+
+# 3. Access Jenkins
+open http://localhost:8080
+
+# 4. Install recommended plugins + Docker Pipeline plugin
+# 5. Create job pointing to your GitHub repo
+# 6. Jenkins automatically builds on commits (SCM polling every 2 minutes)
 ```
 
-Access Jenkins at `http://localhost:8080` and follow the setup wizard.
+#### Key Features
 
-**Key Features:**
-- ✅ Multi-environment testing (dev, qa, prod)
-- ✅ Multi-browser support (Chromium, Firefox, WebKit)
-- ✅ Parallel test execution
-- ✅ HTML test reports with history
-- ✅ Email notifications
-- ✅ Docker-based Jenkins agents
-- ✅ Automated browser installation
+- ✅ **Dynamic Agent Architecture** - Playwright containers created on-demand, destroyed after tests
+- ✅ **Official Playwright Image** - Uses `mcr.microsoft.com/playwright/java:v1.48.0-noble` with pre-installed browsers
+- ✅ **No Manual Installation** - Browsers come pre-configured in container
+- ✅ **Auto-triggered Builds** - SCM polling detects GitHub commits every 2 minutes
+- ✅ **Multi-environment Support** - Parameterized builds for dev/qa/prod
+- ✅ **Build History & Reports** - Web UI with test results, logs, and trends
+- ✅ **Headless Mode** - Auto-detected via `CI=true` environment variable
 
-**Files:**
-- `Jenkinsfile` - Complete pipeline configuration
-- `jenkins/README.md` - Comprehensive setup documentation
-- `jenkins/Dockerfile` - Custom Jenkins agent with Playwright
-- `jenkins/docker-compose.yml` - Docker orchestration
-- `jenkins/setup.sh` - Automated setup script
+#### Pipeline Files
 
-**Manual Pipeline Trigger:**
-```bash
-# Via Jenkins UI
-Jenkins → Playwright-Tests → Build with Parameters
+| File | Purpose | Usage |
+|------|---------|-------|
+| **`Jenkinsfile`** | Production pipeline with Playwright Docker agent | Active - used by main job |
+| **`Jenkinsfile.multi-platform`** | Example: Sequential Playwright + Appium tests | Reference - copy to customize |
+| **`Jenkinsfile.parallel`** | Example: Parallel multi-browser/platform testing | Reference - advanced use cases |
 
-# Select:
-# - Environment: dev/qa/prod
-# - Browser: chromium/firefox/webkit/all
-# - Headless: true/false
-# - Test Class: (optional) specific test to run
+#### Docker Images
+
+| File | Image | Purpose |
+|------|-------|---------|
+| **`jenkins/Dockerfile.jenkins`** | Custom jenkins/jenkins:lts-jdk17 + Docker CLI | Jenkins master with Docker support |
+| **`jenkins/Dockerfile.appium`** | Custom appium/appium + Java 17 + Maven | Optional - for mobile testing |
+| **Agent (auto-pulled)** | mcr.microsoft.com/playwright/java:v1.48.0-noble | Runs tests with pre-installed browsers |
+
+#### What Happens on Each Build
+
 ```
+1. GitHub commit pushed
+   ↓
+2. Jenkins SCM polling detects change (every 2 minutes)
+   ↓
+3. Jenkins master reads Jenkinsfile from repo
+   ↓
+4. Jenkins pulls Playwright Docker image (cached after first run)
+   ↓
+5. Temporary Playwright container created
+   ↓
+6. Container runs: mvn clean test
+   ↓
+7. Test results sent back to Jenkins master
+   ↓
+8. Container destroyed
+   ↓
+9. Results displayed in Jenkins UI
+```
+
+#### Advanced: Parallel Multi-Platform Testing
+
+See `Jenkinsfile.parallel` for example of running tests across multiple containers simultaneously:
+
+- Playwright Chromium tests (container 1)
+- Playwright Firefox tests (container 2)
+- Appium Android tests (container 3)
+- Appium iOS tests (container 4)
+
+**All 4 run in parallel** - reduces build time from 12 minutes to 3 minutes!
+
+#### Resources
+
+- **[Jenkins Setup Guide](jenkins/README.md)** - Detailed setup instructions
+- **Docker Compose:** `jenkins/docker-compose.yml` - Complete orchestration
+- **Custom Images:** `jenkins/Dockerfile.jenkins`, `jenkins/Dockerfile.appium`
 
 ### GitHub Actions Example
 
@@ -525,7 +592,8 @@ This project is licensed under the MIT License.
 For questions or issues, please contact the development team or open an issue on GitHub.
 
 ---
-**Last Updated**: November 27, 2025  
-**CI/CD Status**: ✅ Automated Jenkins pipeline active (Docker-based)  
-**Build Trigger**: SCM polling enabled - checks GitHub every 2 minutes  
-**Test Environment**: All Playwright browsers installed in Docker container
+**Last Updated**: November 28, 2025  
+**CI/CD Architecture**: Docker-based Jenkins with dynamic Playwright agent containers  
+**Build Trigger**: SCM polling every 2 minutes + manual triggers  
+**Container Stack**: jenkins-master (permanent) → playwright containers (on-demand)  
+**Browsers**: Chromium, Firefox, WebKit (pre-installed in Playwright Docker image)
