@@ -28,35 +28,8 @@ services:
       retries: 5
       start_period: 60s
 
-  # Jenkins Agent for Playwright Tests
-  jenkins-agent-playwright:
-    build:  Z1`11`    `       `
-      context: .
-      dockerfile: Dockerfile
-    container_name: jenkins-agent-playwright
-    privileged: true
-    user: jenkins
-    environment:
-      - JENKINS_URL=http://jenkins:8080
-      - JENKINS_AGENT_NAME=playwright-agent
-      - JENKINS_SECRET=${JENKINS_AGENT_SECRET}
-      - JENKINS_AGENT_WORKDIR=/home/jenkins/agent
-      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-    volumes:
-      - agent_workspace:/home/jenkins/agent
-      - playwright_browsers:/ms-playwright
-    networks:
-      - jenkins-network
-    depends_on:
-      - jenkins
-    restart: unless-stopped
-
 volumes:
   jenkins_home:
-    driver: local
-  agent_workspace:
-    driver: local
-  playwright_browsers:
     driver: local
 
 networks:
