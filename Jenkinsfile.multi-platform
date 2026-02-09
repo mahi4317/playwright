@@ -38,6 +38,7 @@ pipeline {
                 echo "🌐 Running Playwright web tests..."
                 sh '''
                     echo "Testing with Playwright browsers"
+                    cd java-tests
                     mvn clean test -Denv=${ENVIRONMENT} -Dtest=*Web*
                 '''
             }
@@ -63,6 +64,7 @@ pipeline {
                     sleep 5
                     
                     # Run mobile tests
+                    cd java-tests
                     mvn clean test -Denv=${ENVIRONMENT} -Dtest=*Mobile*
                 '''
             }
@@ -72,8 +74,8 @@ pipeline {
             agent any
             steps {
                 echo "📊 Publishing test results..."
-                junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
-                archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
+                junit testResults: 'java-tests/target/surefire-reports/*.xml', allowEmptyResults: true
+                archiveArtifacts artifacts: 'java-tests/target/surefire-reports/**/*', allowEmptyArchive: true
             }
         }
     }

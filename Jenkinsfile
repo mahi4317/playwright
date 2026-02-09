@@ -35,6 +35,8 @@ pipeline {
             steps {
                 echo "🔨 Building and running tests..."
                 sh '''
+                    cd java-tests
+
                     # Verify environment (running in Playwright container)
                     echo "Java version:"
                     java -version
@@ -54,8 +56,8 @@ pipeline {
         stage('Publish Results') {
             steps {
                 echo "📊 Publishing test results..."
-                junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
-                archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
+                junit testResults: 'java-tests/target/surefire-reports/*.xml', allowEmptyResults: true
+                archiveArtifacts artifacts: 'java-tests/target/surefire-reports/**/*', allowEmptyArchive: true
             }
         }
     }

@@ -4,10 +4,10 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 
 ## 📚 Documentation
 
-- **[Framework Architecture & Execution Flow](docs/FRAMEWORK_ARCHITECTURE.md)** - Complete architecture deep dive
-- **[Test Data Strategy Guide](docs/TEST_DATA_STRATEGY.md)** - When to use structured vs random data
-- **[Test Data Management Guide](docs/TEST_DATA_MANAGEMENT.md)** - Comprehensive data handling strategies
-- **[Utils Package Documentation](docs/UTILS_PACKAGE.md)** - Reusable utility classes guide
+- **[Framework Architecture & Execution Flow](java-tests/docs/FRAMEWORK_ARCHITECTURE.md)** - Complete architecture deep dive
+- **[Test Data Strategy Guide](java-tests/docs/TEST_DATA_STRATEGY.md)** - When to use structured vs random data
+- **[Test Data Management Guide](java-tests/docs/TEST_DATA_MANAGEMENT.md)** - Comprehensive data handling strategies
+- **[Utils Package Documentation](java-tests/docs/UTILS_PACKAGE.md)** - Reusable utility classes guide
 - **[Jenkins CI/CD Setup](jenkins/README.md)** - Complete CI/CD pipeline setup
 
 ## Features
@@ -37,69 +37,82 @@ A production-ready test automation framework built with **Playwright**, **Java 1
 ## Project Structure
 
 ```
-playwright-java-automation/
-├── docs/
-│   ├── FRAMEWORK_ARCHITECTURE.md       # Complete architecture & flow guide
-│   ├── TEST_DATA_MANAGEMENT.md         # Test data handling guide
-│   └── UTILS_PACKAGE.md                # Utils package documentation
+playwright/
+├── java-tests/                             # Playwright Java + TestNG project
+│   ├── docs/
+│   │   ├── FRAMEWORK_ARCHITECTURE.md       # Complete architecture & flow guide
+│   │   ├── TEST_DATA_MANAGEMENT.md         # Test data handling guide
+│   │   ├── TEST_DATA_STRATEGY.md           # Test data strategy guide
+│   │   └── UTILS_PACKAGE.md                # Utils package documentation
+│   ├── src/
+│   │   ├── main/java/com/
+│   │   │   ├── config/
+│   │   │   │   └── ConfigManager.java          # Environment configuration loader
+│   │   │   ├── logging/
+│   │   │   │   └── LogHelper.java              # SLF4J logger utility
+│   │   │   ├── pages/
+│   │   │   │   ├── BasePage.java               # Base page with common actions
+│   │   │   │   ├── LoginPage.java              # Login page object with fluent API
+│   │   │   │   └── WebPageInput.java           # Web input page object
+│   │   │   ├── testdata/
+│   │   │   │   ├── TestDataManager.java        # JSON/Random data manager
+│   │   │   │   ├── ExcelDataProvider.java      # Excel DataProvider for TestNG
+│   │   │   │   └── models/
+│   │   │   │       ├── LoginUser.java          # Login data model
+│   │   │   │       └── WebInputData.java       # Web input data model
+│   │   │   └── utils/
+│   │   │       ├── WaitUtils.java              # Explicit wait utilities
+│   │   │       ├── ScreenshotUtils.java        # Screenshot capture utilities
+│   │   │       ├── DataGeneratorUtils.java     # Random data generation
+│   │   │       ├── StringUtils.java            # String manipulation utilities
+│   │   │       └── AssertionUtils.java         # Enhanced assertion utilities
+│   │   └── test/
+│   │       ├── java/
+│   │       │   ├── base/
+│   │       │   │   ├── BaseTest.java           # TestNG base class with lifecycle hooks
+│   │       │   │   ├── BrowserContextManager.java  # Browser/context management
+│   │       │   │   └── LoggingListener.java    # TestNG listener for events
+│   │       │   └── tests/
+│   │       │       ├── LoginTest.java          # Login test examples
+│   │       │       ├── LoginTestWithData.java  # Data-driven login tests
+│   │       │       └── WebInputTest.java       # Web input test examples
+│   │       └── resources/
+│   │           ├── config/
+│   │           │   ├── dev.properties          # Dev environment config
+│   │           │   ├── qa.properties           # QA environment config
+│   │           │   └── prod.properties         # Prod environment config
+│   │           ├── testdata/
+│   │           │   ├── users.json              # User test data
+│   │           │   ├── webinputs.json          # Web input test data
+│   │           │   └── testdata.xlsx           # Excel test data (optional)
+│   │           ├── logback.xml                 # Logback configuration
+│   │           └── testng.xml                  # TestNG suite definition
+│   ├── target/
+│   │   ├── logs/
+│   │   │   └── test-execution.log              # Rolling log files (7-day rotation)
+│   │   └── surefire-reports/                   # TestNG HTML/XML reports
+│   └── pom.xml                                 # Maven dependencies & build config
+├── ts-tests/                               # Playwright Test (TypeScript) mirror
+│   ├── src/pages/                          # TS page objects
+│   ├── src/tests/                          # TS tests (*.spec.ts)
+│   ├── playwright.config.ts                # Playwright Test config
+│   ├── tsconfig.json                       # TypeScript config
+│   └── package.json                        # Node dependencies & scripts
+├── py-tests/                               # Playwright + pytest (Python) mirror
+│   ├── pages/                              # Python page objects
+│   ├── tests/                              # Pytest tests
+│   ├── requirements.txt                    # Python dependencies
+│   └── pytest.ini                          # Pytest configuration
 ├── jenkins/
-│   ├── README.md                       # Jenkins CI/CD setup guide
-│   ├── Dockerfile.jenkins              # Custom Jenkins image with Docker CLI
-│   ├── Dockerfile.appium               # Custom Appium image for mobile testing
-│   ├── docker-compose.yml              # Docker orchestration for Jenkins
-│   └── Jenkinsfile                     # Main pipeline (in root)
-├── Jenkinsfile                         # Production pipeline with Playwright Docker agent
-├── Jenkinsfile.multi-platform          # Example: Sequential Playwright + Appium
-├── Jenkinsfile.parallel                # Example: Parallel multi-browser + mobile testing
-├── src/
-│   ├── main/java/com/
-│   │   ├── config/
-│   │   │   └── ConfigManager.java          # Environment configuration loader
-│   │   ├── logging/
-│   │   │   └── LogHelper.java              # SLF4J logger utility
-│   │   ├── pages/
-│   │   │   ├── BasePage.java               # Base page with common actions
-│   │   │   ├── LoginPage.java              # Login page object with fluent API
-│   │   │   └── WebPageInput.java           # Web input page object
-│   │   ├── testdata/
-│   │   │   ├── TestDataManager.java        # JSON/Random data manager
-│   │   │   ├── ExcelDataProvider.java      # Excel DataProvider for TestNG
-│   │   │   └── models/
-│   │   │       ├── LoginUser.java          # Login data model
-│   │   │       └── WebInputData.java       # Web input data model
-│   │   └── utils/
-│   │       ├── WaitUtils.java              # Explicit wait utilities
-│   │       ├── ScreenshotUtils.java        # Screenshot capture utilities
-│   │       ├── DataGeneratorUtils.java     # Random data generation
-│   │       ├── StringUtils.java            # String manipulation utilities
-│   │       └── AssertionUtils.java         # Enhanced assertion utilities
-│   └── test/
-│       ├── java/
-│       │   ├── base/
-│       │   │   ├── BaseTest.java           # TestNG base class with lifecycle hooks
-│       │   │   ├── BrowserContextManager.java  # Browser/context management
-│       │   │   └── LoggingListener.java    # TestNG listener for events
-│       │   └── tests/
-│       │       ├── LoginTest.java          # Login test examples
-│       │       ├── LoginTestWithData.java  # Data-driven login tests
-│       │       └── WebInputTest.java       # Web input test examples
-│       └── resources/
-│           ├── config/
-│           │   ├── dev.properties          # Dev environment config
-│           │   ├── qa.properties           # QA environment config
-│           │   └── prod.properties         # Prod environment config
-│           ├── testdata/
-│           │   ├── users.json              # User test data
-│           │   ├── webinputs.json          # Web input test data
-│           │   └── testdata.xlsx           # Excel test data (optional)
-│           ├── logback.xml                 # Logback configuration
-│           └── testng.xml                  # TestNG suite definition
-├── target/
-│   ├── logs/
-│   │   └── test-execution.log              # Rolling log files (7-day rotation)
-│   └── surefire-reports/                   # TestNG HTML/XML reports
-├── pom.xml                                 # Maven dependencies & build config
-└── Jenkinsfile                             # CI/CD pipeline definition
+│   ├── README.md                           # Jenkins CI/CD setup guide
+│   ├── Dockerfile.jenkins                  # Custom Jenkins image with Docker CLI
+│   ├── Dockerfile.appium                   # Custom Appium image for mobile testing
+│   ├── docker-compose.yml                  # Docker orchestration for Jenkins
+│   └── Jenkinsfile                         # Example Jenkins configuration docs
+├── Jenkinsfile                             # Production pipeline with Playwright Docker agent (Java)
+├── Jenkinsfile.multi-platform              # Example: Sequential Playwright + Appium
+├── Jenkinsfile.parallel                    # Example: Parallel multi-browser + mobile testing
+└── README.md                               # This file
 ```
 
 ## Setup
@@ -112,7 +125,8 @@ playwright-java-automation/
 
 2. **Install Playwright browsers**:
    ```bash
-   mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install"
+  cd java-tests
+  mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install"
    ```
 
 3. **Verify Java version**:
@@ -123,7 +137,7 @@ playwright-java-automation/
 
 ## Configuration
 
-Edit `src/test/resources/config/dev.properties` to configure:
+Edit `java-tests/src/test/resources/config/dev.properties` to configure:
 
 ```properties
 base.url=https://practice.expandtesting.com/
@@ -138,23 +152,29 @@ timeout=30000
 
 ## Running Tests
 
-### Run all tests
+All Java Maven commands should be run from inside `java-tests/`.
+
+### Run all Java tests
 ```bash
+cd java-tests
 mvn clean test
 ```
 
-### Run a specific test class
+### Run a specific Java test class
 ```bash
+cd java-tests
 mvn test -Dtest=WebInputTest
 ```
 
-### Run a specific test method
+### Run a specific Java test method
 ```bash
+cd java-tests
 mvn test -Dtest=WebInputTest#testWebInput
 ```
 
-### Run with different environment
+### Run Java tests with different environment
 ```bash
+cd java-tests
 mvn test -Denv=qa    # Uses src/test/resources/config/qa.properties
 mvn test -Denv=prod  # Uses src/test/resources/config/prod.properties
 ```

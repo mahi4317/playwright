@@ -32,7 +32,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh 'mvn test -Dbrowser=chromium -Denv=${ENVIRONMENT}'
+                        sh 'cd java-tests && mvn test -Dbrowser=chromium -Denv=${ENVIRONMENT}'
                     }
                 }
                 
@@ -43,7 +43,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh 'mvn test -Dbrowser=firefox -Denv=${ENVIRONMENT}'
+                        sh 'cd java-tests && mvn test -Dbrowser=firefox -Denv=${ENVIRONMENT}'
                     }
                 }
                 
@@ -59,6 +59,7 @@ pipeline {
                         sh '''
                             appium &
                             sleep 5
+                            cd java-tests
                             mvn test -Dplatform=android -Denv=${ENVIRONMENT}
                         '''
                     }
@@ -75,6 +76,7 @@ pipeline {
                         sh '''
                             appium &
                             sleep 5
+                            cd java-tests
                             mvn test -Dplatform=ios -Denv=${ENVIRONMENT}
                         '''
                     }
@@ -85,7 +87,7 @@ pipeline {
         stage('Publish Results') {
             agent any
             steps {
-                junit 'target/surefire-reports/*.xml'
+                junit 'java-tests/target/surefire-reports/*.xml'
             }
         }
     }
