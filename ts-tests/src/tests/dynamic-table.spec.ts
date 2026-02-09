@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/base';
 import { DynamicTablePage } from '../pages/dynamic-table';
 
 test.describe('Dynamic table', () => {

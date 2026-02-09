@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/base';
 import { WebPageInput } from '../pages/web-page-input';
 
 test('web input search and heading validation', async ({ page, baseURL }) => {

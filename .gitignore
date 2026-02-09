@@ -58,5 +58,10 @@ playwright-report/
 test-results/
 .auth/
 
+# Python virtual env and caches
+py-tests/.venv/
+py-tests/**/__pycache__/
+
+
 # Environment files (optional - uncomment if you want to exclude)
 # src/test/resources/config/*.properties

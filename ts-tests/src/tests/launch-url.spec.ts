@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/base';
 import { HomePage } from '../pages/home-page';
 
 test('launch base URL using POM', async ({ page, baseURL }) => {
