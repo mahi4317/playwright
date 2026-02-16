@@ -8,8 +8,10 @@ export class IframePage {
   }
 
   async navigate() {
-    await this.page.goto('https://practice-automation.com/iframes/');
-    await this.page.waitForSelector("iframe[name='top-iframe']");
+    await Promise.all([
+      this.page.goto('https://practice-automation.com/iframes/'),
+      this.page.waitForSelector("iframe[name='top-iframe']")
+    ]);
   }
 
   iframe(): FrameLocator {
