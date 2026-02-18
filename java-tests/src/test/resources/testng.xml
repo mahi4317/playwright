@@ -5,6 +5,7 @@
     </listeners>
     <test name="Launch URL Test">
         <classes>
+            <class name="tests.GoogleTest"/>
             <class name="tests.LaunchUrlTest"/>
             <class name="tests.WebInputTest"/>
             <class name="tests.LoginTest"/>
