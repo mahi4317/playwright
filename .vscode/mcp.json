@@ -1,18 +1,9 @@
 {
   "mcpServers": {
-    "atlassian": {
+    "playwright": {
       "command": "npx",
       "args": [
-        "-y",
-        "@xuandev/atlassian-mcp",
-        "--config",
-        "/Users/Reyansh/atlassian-mcp-server/config.json"
-      ]
-    },
-    "playwright": {
-      "command": "node",
-      "args": [
-        "/Users/Reyansh/playwright-mcp-server/build/index.js"
+        "@playwright/mcp@latest"
       ]
     }
   }
